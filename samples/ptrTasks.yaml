@@ -1,0 +1,7 @@
+tasks:
+  - name: Get uname
+    action: uname -a
+
+  - name: Echo "{{ vars.service }}" 
+    action: echo "In tasks.yaml {{ vars.service }} at {{ machine.Hostname}}"
+   

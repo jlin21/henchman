@@ -92,7 +92,7 @@ func (sshTransport *SSHTransport) Initialize(config *TransportConfig) error {
 
 func (sshTransport *SSHTransport) getClientSession() (*ssh.Client, *ssh.Session, error) {
 	address := fmt.Sprintf("%s:%d", sshTransport.Host, sshTransport.Port)
-	log.Printf("---- %s\n", address)
+	//log.Printf("---- %s\n", address)
 	client, err := ssh.Dial("tcp", address, sshTransport.Config)
 	if err != nil {
 		return nil, nil, err

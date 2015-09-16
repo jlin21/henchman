@@ -144,6 +144,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Println(plan.Tasks)
 	local := localhost()
 	// Execute the same plan concurrently across all the machines.
 	// Note the tasks themselves in plan are executed sequentially.
@@ -158,7 +159,9 @@ func main() {
 
 		//renders all tasks in the plan file
 		tasks, err := henchman.PrepareTasks(plan.Tasks, plan.Vars, machine)
-
+		fmt.Println("\n" + "INITIAL TASKS")
+		fmt.Println(tasks)
+		fmt.Println()
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -185,7 +188,10 @@ func main() {
 				}
 				if whenVal == true {
 					if task.Include != "" {
-						err = henchman.UpdateTasks(&tasks, task.Vars, ndx, *machine)
+						tasks, err = henchman.UpdateTasks(tasks, task.Vars, ndx, *machine)
+						fmt.Println("\n" + "NESTED TASKS at " + machine.Hostname)
+						fmt.Println(tasks)
+						fmt.Println()
 						if err != nil {
 							log.Println("Error at Include Eval at task: " + task.Name)
 							log.Println("Error: " + err.Error())
@@ -197,7 +203,7 @@ func main() {
 						} else {
 							status, err = task.Run(machine, registerMap)
 						}
-						plan.SaveStatus(&task, status.Status)
+						plan.SaveStatus(task, status.Status)
 						if err != nil {
 							log.Printf("Error when executing task: %s\n", err.Error())
 						}

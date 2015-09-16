@@ -15,7 +15,7 @@ type TaskVars map[string]interface{}
 // is run concurrently on multiple machines
 type Plan struct {
 	Hosts []string
-	Tasks []Task `yaml:"tasks"`
+	Tasks []*Task `yaml:"tasks"`
 	Vars  TaskVars
 	Name  string
 
@@ -87,9 +87,9 @@ func NewPlanFromYAML(planBuf []byte, hostsFileBuf []byte, overrides TaskVars) (*
 // come back to context variable stuff after getting include done
 // look at diagram
 // renders Task list, uses vars and machine for context
-func PrepareTasks(tasks []Task, vars TaskVars, machine Machine) ([]Task, error) {
+func PrepareTasks(tasks []*Task, vars TaskVars, machine Machine) ([]*Task, error) {
 	// changes Task array back to yaml form to be rendered
-	var newTasks = []Task{}
+	var newTasks = []*Task{}
 	tasksBuf, err := yaml.Marshal(&tasks)
 	if err != nil {
 		return nil, err
@@ -120,18 +120,17 @@ func PrepareTasks(tasks []Task, vars TaskVars, machine Machine) ([]Task, error) 
 // Updates the task list if there is a valid include param
 // for each include param it will update the vars context if
 // it's provided.
-func UpdateTasks(tasksPtr *[]Task, vars TaskVars, ndx int, machine Machine) error {
-	tasks := *tasksPtr
+func UpdateTasks(tasks []*Task, vars TaskVars, ndx int, machine Machine) ([]*Task, error) {
 	includeBuf, err := ioutil.ReadFile(tasks[ndx].Include)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// creates a new Plan object with only the tasks field filled in
 	tmpPlan := Plan{}
 	err = yaml.Unmarshal(includeBuf, &tmpPlan)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// if there were no variables provided by the include task
@@ -152,14 +151,13 @@ func UpdateTasks(tasksPtr *[]Task, vars TaskVars, ndx int, machine Machine) erro
 
 	tmpPlan.Tasks, err = PrepareTasks(tmpPlan.Tasks, tmpPlan.Vars, machine)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// insert the tasks in the tasks list
-	tasks = append(tasks[:ndx+1], append(tmpPlan.Tasks, tasks[ndx+1:]...)...)
-	*tasksPtr = tasks
+	newTasks := append(tasks[:ndx+1], append(tmpPlan.Tasks, tasks[ndx+1:]...)...)
 
-	return nil
+	return newTasks, nil
 }
 
 // Prints the summary of the Plan execution across all the hosts

@@ -102,6 +102,7 @@ func (task *Task) Run(machine *Machine, regMap map[string]interface{}) (*TaskSta
 	status := TaskStatus{taskStatus, out.String()}
 	escapeCode := statuses[taskStatus]
 	var reset string = statuses["reset"]
+	log.Printf("---- %s\n", machine.Hostname)
 	log.Printf("%s: %s [%s] - %s", task.Id, escapeCode, status.Status, status.Message+reset)
 	return &status, err
 }
